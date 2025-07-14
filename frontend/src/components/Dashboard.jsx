@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import ChartsPage from '../pages/ChartsPage';
 import ClientAttendancePage from '../pages/ClientAttendancePage';
 import ClientPage from '../pages/ClientPage';
@@ -13,6 +14,12 @@ const Dashboard = ({ sidebarLogo = "/assets/images/roc.png" }) => {
     const [activePage, setActivePage] = useState('Client');
     const [navbarText, setNavbarText] = useState('Dashboard'); // Default navbar text
     const [toastMessage, setToastMessage] = useState(null);
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        // Navigate to root route (/)
+        navigate('/');
+    };
 
     const renderPage = () => {
         switch (activePage) {
@@ -59,8 +66,9 @@ const Dashboard = ({ sidebarLogo = "/assets/images/roc.png" }) => {
                     </button>
                 </div>
 
-                <div className="mt-auto flex justify-center pt-16">
-                    <img src="/assets/images/logout.png" alt="Logout" className="w-16 h-16 cursor-pointer hover:opacity-80 transition" />
+                {/* Moved logout button upwards */}
+                <div className="mt-8 flex justify-center">
+                    <img src="/assets/images/logout.png" alt="Logout" className="w-16 h-16 cursor-pointer hover:opacity-80 transition" onClick={handleLogout} />
                 </div>
             </aside>
 
