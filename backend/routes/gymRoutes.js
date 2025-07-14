@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { addGym, getGyms, updateGym, deleteGym, loginGym } = require('../controller/gymController');
+const { addGym, getGyms, updateGym, deleteGym, loginGym, getUserProfile } = require('../controller/gymController');
 
 router.post('/', addGym);
 router.get('/gyms', getGyms);
-router.put('/gyms/:id', updateGym);
+router.put('/profile', updateGym);
+router.get('/profile', getUserProfile);
 router.get('/login', loginGym);
 router.delete('/gyms/:id', deleteGym);
 

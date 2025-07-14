@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Dashboard from "./components/Dashboard"; // Verify this path
 import ErrorBoundary from "./components/ErrorBoundry";
 import HomePage from "./pages/HomePage"; // Verify this path
+import PaymentPage from "./pages/PaymentPage";
 import { useAuthStore } from "./store/useAuthStore";
 
 function App() {
@@ -27,7 +28,8 @@ function App() {
 					<Route
 						path="/dash"
 						element={authUser ? <Dashboard /> : <Navigate to="/" replace />}
-					/>
+					/><Route path="/esewa-payment-new" element={<PaymentPage />} />
+
 					<Route path="*" element={<Navigate to="/" replace />} /> {/* Catch-all route */}
 				</Routes>
 			</ErrorBoundary>

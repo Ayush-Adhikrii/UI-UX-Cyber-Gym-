@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
+import UpdateProfile from '../components/UpdateProfile';
 import ChartsPage from '../pages/ChartsPage';
 import ClientAttendancePage from '../pages/ClientAttendancePage';
 import ClientPage from '../pages/ClientPage';
@@ -14,6 +15,7 @@ const Dashboard = ({ sidebarLogo = "/assets/images/roc.png" }) => {
     const [activePage, setActivePage] = useState('Client');
     const [navbarText, setNavbarText] = useState('Dashboard'); // Default navbar text
     const [toastMessage, setToastMessage] = useState(null);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -51,7 +53,7 @@ const Dashboard = ({ sidebarLogo = "/assets/images/roc.png" }) => {
             {/* Sidebar */}
             <aside className="w-72 bg-[#C62828] text-white fixed h-full p-8 flex flex-col">
                 <div className="flex justify-center mb-20">
-                    <img src={sidebarLogo} alt="Logo" className="w-28 h-28 object-contain rounded-full" />
+                    <img src={sidebarLogo} alt="Logo" className="w-28 h-28 object-contain rounded-full cursor-pointer" onClick={() => setIsProfileOpen(true)} />
                 </div>
 
                 <div className="flex flex-col space-y-10 flex-grow items-center">
@@ -66,8 +68,8 @@ const Dashboard = ({ sidebarLogo = "/assets/images/roc.png" }) => {
                     </button>
                 </div>
 
-                {/* Moved logout button upwards */}
-                <div className="mt-8 flex justify-center">
+                {/* Logout button */}
+                <div className="mt-10 flex justify-center">
                     <img src="/assets/images/logout.png" alt="Logout" className="w-16 h-16 cursor-pointer hover:opacity-80 transition" onClick={handleLogout} />
                 </div>
             </aside>
@@ -99,6 +101,9 @@ const Dashboard = ({ sidebarLogo = "/assets/images/roc.png" }) => {
                         {renderPage()}
                     </div>
                 </main>
+
+                {/* Update Profile Modal */}
+                {isProfileOpen && <UpdateProfile onClose={() => setIsProfileOpen(false)} setToastMessage={setToastMessage} />}
             </div>
         </div>
     );

@@ -48,6 +48,19 @@ export const useAuthStore = create((set) => ({
 			toast.error(error.response?.data?.message || "Something went wrong");
 		}
 	},
+	updateUserProfile: async (formData) => {
+		set({ loading: true, error: null });
+		try {
+			const response = await axiosInstance.put('/auth/profile', formData, {
+				headers: { 'Content-Type': 'multipart/form-data' },
+			});
+			set({ userProfile: response.data, loading: false });
+			return response.data;
+		} catch (error) {
+			set({ error: error.message, loading: false });
+			throw error;
+		}
+	},
 
 	// Upload image
 	uploadImage: async (image) => {
@@ -77,13 +90,24 @@ export const useAuthStore = create((set) => ({
 				throw new Error("User is not authenticated or _id is missing");
 			}
 			set({ loading: true });
-			const res = await axiosInstance.put(`/auth/update/${authUser._id}`, updateData);
+			const res = await axiosInstance.put(`/gym/update/${authUser._id}`, updateData);
 			set({ authUser: res.data.user });
 			toast.success("Profile updated successfully");
 		} catch (error) {
 			toast.error(error.response?.data?.message || error.message || "Something went wrong");
 		} finally {
 			set({ loading: false });
+		}
+	},
+	getUserProfile: async () => {
+		set({ loading: true, error: null });
+		try {
+			const response = await axiosInstance.get('/gym/profile', {
+				headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }, // Adjust token storage as needed
+			});
+			set({ userProfile: response.data, loading: false });
+		} catch (error) {
+			set({ error: error.message, loading: false });
 		}
 	},
 
