@@ -1,4 +1,21 @@
-const db = require('../firebase');
+const db = require('../firebase'); // Your firebase.js with firebase-admin
+const nodemailer = require('nodemailer');
+const bcrypt = require('bcrypt'); // For password hashing (install with `npm install bcrypt`)
+require('dotenv').config();
+
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER, // Use env variable or fallback
+        pass: process.env.EMAIL_PASS      // Use env variable or fallback
+    },
+});
+
+const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+const otpStore = new Map();
+
 
 // CREATE
 const addGym = (req, res) => {
@@ -229,6 +246,149 @@ const updateUserProfile = async (req, res) => {
         res.status(500).json({ error: "Failed to update user profile", details: error.message });
     }
 };
+// UPDATE
+
+const updatePassword = async (req, res) => {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+        return res.status(400).send("Email and new password are required");
+    }
+
+    try {
+        const gymsRef = db.ref('gyms');
+        const snapshot = await get(gymsRef);
+        if (snapshot.exists()) {
+            const gyms = snapshot.val();
+            const gym = Object.values(gyms).find(g => g.email === email);
+            if (gym) {
+                const gymRef = db.ref(`gyms/${gym.id}`);
+                await update(gymRef, { password: newPassword });
+                return res.status(200).json({ message: 'Password updated successfully' });
+            } else {
+                return res.status(404).send("No account found with this email");
+            }
+        }
+        return res.status(404).send("No gyms found");
+    } catch (error) {
+        console.error('Update error:', error);
+        return res.status(500).send(error.message);
+    }
+};
+const sendOtp = async (req, res) => {
+    transporter.verify(err => {
+        if (err) console.error("❌ Mailer error:", err);
+        else console.log("📧 Mailer ready");
+    });
+
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).send('Email is required');
+    }
+
+    try {
+        console.log('Attempting to send OTP to:', email); // Debug log
+        const gymsRef = db.ref('gyms');
+        const snapshot = await gymsRef.once('value');
+        if (!snapshot.exists()) {
+            console.log('No gyms found in database');
+            return res.status(404).send('No gyms found');
+        }
+
+        const gyms = snapshot.val();
+        const gym = Object.values(gyms).find(g => g.email === email);
+
+        if (!gym) {
+            console.log('No gym found with email:', email);
+            return res.status(404).send('No gym found with this email');
+        }
+
+        const otp = generateOtp();
+        otpStore.set(email, otp); // Store OTP with email
+        console.log('Generated OTP:', otp); // Debug log
+
+        const mailOptions = {
+            from: 'cybergym98@gmail.com',
+            to: email,
+            subject: 'Your OTP for Password Reset',
+            text: `Your OTP for password reset is ${otp}. It is valid for 10 minutes.`,
+        };
+
+        // Verify transporter before sending
+        // await new Promise((resolve, reject) => {
+        // transporter.verify((error, success) => {
+        //     if (error) {
+        //         console.error('Transporter verification failed:', error);
+        //         reject(error);
+        //     } else {
+        //         console.log('Transporter verified successfully');
+        //         resolve(success);
+        //     }
+        // });
+        // });
+
+        // const mailOptions = {
+        //     from: process.env.EMAIL_USER || 'your-email@gmail.com',
+        //     to: email,
+        //     subject: 'Your OTP for Password Reset',
+        //     text: `Your OTP for password reset is ${otp}. It is valid for 10 minutes.`,
+        // };
+
+        console.log('Sending email with options:', mailOptions); // Debug log
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully to:', email, 'Message ID:', info.messageId); // Debug log
+        res.status(200).json({ message: 'OTP sent successfully', messageId: info.messageId });
+    } catch (error) {
+        console.error('OTP send error details:', error); // Detailed error log
+        if (error.code === 'EAUTH') {
+            console.error('Authentication failed: Please check your Gmail credentials or use an App Password if 2FA is enabled.');
+        } else if (error.code === 'ESOCKET') {
+            console.error('Connection error: Ensure your server can reach Gmail SMTP servers.');
+        }
+        res.status(500).send('Failed to send OTP');
+    }
+};
+
+// Forgot Password - Update Password
+const forgotPassword = async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+        return res.status(400).send('Email, OTP, and new password are required');
+    }
+
+    try {
+        const storedOtp = otpStore.get(email);
+        if (!storedOtp || storedOtp !== otp) {
+            return res.status(400).send('Invalid or expired OTP');
+        }
+
+        const gymsRef = db.ref('gyms');
+        const snapshot = await gymsRef.once('value');
+        if (snapshot.exists()) {
+            const gyms = snapshot.val();
+            const gym = Object.values(gyms).find(g => g.email === email);
+
+            if (!gym) {
+                return res.status(404).send('No gym found with this email');
+            }
+
+            const hashedPassword = newPassword;
+            const gymRef = db.ref(`gyms/${gym.id}`);
+            await gymRef.update({ password: hashedPassword });
+
+            // Clear OTP after successful use
+            otpStore.delete(email);
+            res.status(200).json({ message: 'Password updated successfully' });
+        } else {
+            res.status(404).send('No gyms found');
+        }
+    } catch (error) {
+        console.error('Update error:', error);
+        res.status(500).send('Failed to update password');
+    }
+};
 
 module.exports = {
     addGym,
@@ -238,4 +398,8 @@ module.exports = {
     loginGym,
     checkAuth,
     getUserProfile,
+    updateUserProfile,
+    updatePassword,
+    sendOtp,
+    forgotPassword
 };

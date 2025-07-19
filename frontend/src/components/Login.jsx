@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from '../store/useAuthStore';
-
+import ForgotPassword from './ForgotPassword'; 
 
 const Login = ({ onClose, onRegister }) => {
     const [email, setEmail] = useState('');
@@ -10,7 +10,7 @@ const Login = ({ onClose, onRegister }) => {
     const [errors, setErrors] = useState({});
     const { login, loading } = useAuthStore();
     const navigate = useNavigate();
-
+    const [showForgotPassword, setShowForgotPassword] = useState(false); // State to toggle ForgotPassword component
 
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -91,11 +91,12 @@ const Login = ({ onClose, onRegister }) => {
                     </button>
                 </form>
                 <div className="mt-4 text-center">
-                    <a href="/forgot-password" className="text-sm text-[#C62828] hover:underline">Forgot Password?</a>
+                    <a href="#" onClick={(e) => { e.preventDefault(); setShowForgotPassword(true); }} className="text-sm text-[#C62828] hover:underline">Forgot Password?</a>
                     <p className="text-sm text-gray-600 mt-2">
                         Don't have an account? <a href="#" onClick={(e) => { e.preventDefault(); onRegister(); }} className="text-[#C62828] hover:underline">Register</a>
                     </p>
                 </div>
+                {showForgotPassword && <ForgotPassword onClose={() => setShowForgotPassword(false)} />}
             </div>
         </div>
     );

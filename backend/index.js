@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
+const db = require('./firebase')
 require('dotenv').config();
 
 const clientRoutes = require('./routes/clientRoutes');
@@ -47,6 +48,9 @@ app.use('/api/salary', salaryRoutes);
 const gymController = require('./controller/gymController');
 app.post('/api/gym/login', gymController.loginGym);
 app.post('/api/gym/me/:id', gymController.checkAuth);
+
+
+
 
 
 app.get('/', (req, res) => {
