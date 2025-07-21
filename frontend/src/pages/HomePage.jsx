@@ -185,15 +185,15 @@ const HomePage = () => {
 
                 <div className="relative z-10 text-white w-1/2">
                     <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-                        Start a better shape of you!
+                        Record your data digitally!
                         <br />
-                        Come Join Us!
+                        Join Today!
                     </h1>
                     <button
-                        onClick={(e) => scrollToSection(e, "about")}
+                        onClick={() => setIsRegisterOpen(true)} // Changed to open Register form
                         className="mt-6 bg-white text-black px-8 py-3 rounded-full font-semibold text-base"
                     >
-                        Learn More
+                        Register
                     </button>
                 </div>
 

@@ -11,7 +11,7 @@ import UpdateSalaryPage from '../pages/UpdateSalaryPage';
 import ViewClientPage from '../pages/ViewClientPage';
 import ViewStaffPage from '../pages/ViewStaffPage';
 
-const Dashboard = ({ sidebarLogo = "/assets/images/roc.png" }) => {
+const Dashboard = ({ sidebarLogo = "/assets/icons/gymlogo.png" }) => {
     const [activePage, setActivePage] = useState('Client');
     const [navbarText, setNavbarText] = useState('Dashboard'); // Default navbar text
     const [toastMessage, setToastMessage] = useState(null);
@@ -42,7 +42,7 @@ const Dashboard = ({ sidebarLogo = "/assets/images/roc.png" }) => {
             case 'StaffAttendance':
                 return <StaffAttendancePage setToastMessage={setToastMessage} />;
             case 'Charts':
-                return <ChartsPage setNavbarText={setNavbarText} />;
+                return <ChartsPage onDailyAttendance={() => setActivePage('Daily Attendance')} onFeesSalary={() => setActivePage('Fees & Salary')} onMonthlyProfitTrend={() => setActivePage('Monthly Profit Trend')} onCLientVisitFrequency={() => setActivePage('ClientVisitFrequency')} setToastMessage={setToastMessage} />;
             default:
                 return <ClientPage onViewClients={() => setActivePage('ViewClient')} onUpdateMembership={() => setActivePage('UpdateMembership')} onClientAttendance={() => setActivePage('ClientAttendance')} setToastMessage={setToastMessage} />;
         }
